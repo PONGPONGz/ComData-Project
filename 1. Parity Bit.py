@@ -1,16 +1,7 @@
 from functools import reduce
 import numpy as np
 
-# CASES = [
-#     # these strings will be splitted into list later.
-#     [
-#         "10110001",
-#         "10000001",
-#         "10110000",
-#         "00011000"
-#     ]
-# ]
-
+# XOR the whole string/list
 def xor(str_list):
     return reduce(lambda x, y: int(x) ^ int(y), str_list)
 
@@ -42,15 +33,15 @@ def generator(datawords, word_size, num_words):
 def checker(codewords):
     err_loc = (-1, -1)
 
-    # row
+    # row validation
     for i in range(len(codewords)):
         xor_result = xor(codewords[i])
         codewords[i] = codewords[i] + str(xor_result)
         if (xor_result != 0 and err_loc[1] == -1):
             err_loc = (err_loc[0], i)
 
-    columns = list(zip(*codewords))
-    codewords.append("")
+    columns = list(zip(*codewords))             # transpose matrix
+    codewords.append("")                        # empty string at the end to contain parity bits.
     for i in range(len(columns)):
         xor_result = xor(columns[i])
         codewords[-1] = codewords[-1] + str(xor_result)
@@ -63,70 +54,39 @@ def test():
     word_size = 8
     num_words = 4
 
+    # print list elements with identation
+    def printl(_list):
+        for element in _list:
+            print(f"\t{element}")
+
+    # randomly generate bits of <word_size>
     def generate_bit_string():
         return list(np.random.choice(['0', '1'], size=word_size))
 
-    # 10 correct cases
-    for i in range(10):
-        datawords = [generate_bit_string() for _ in range(num_words)]
-        print(f"Test #{i}")
+    for i in range(20):
+        datawords = [generate_bit_string() for _ in range(num_words)]           # generate <num_words> of randomed bits of <word_size>
+        print(f"Test #{i+1}")
         print("Input Datawords: ")
-        for dataword in datawords:
-            print(f"\t{dataword}")
+        printl(datawords)
 
         codewords = generator(datawords, word_size, num_words)
         print("Codewords:")
-        for codeword in codewords:
-            print(f"\t\'{codeword}\'")
+        printl(codewords)
+
+        # For 10 incorrect cases
+        if (i >= 10):
+            # random error point
+            error_row = np.random.randint(0, num_words)
+            error_col = np.random.randint(0, word_size)
+            codewords[error_row] = codewords[error_row][:error_col] + ('0' if codewords[error_row][error_col] == '1' else '1') + codewords[error_row][error_col+1:]
 
         syndrome, err_loc = checker(codewords)
         print("Syndrome:")
-        for row in syndrome:
-            print(f"\t\'{row}\'")
+        printl(syndrome)
 
         if (err_loc == (-1, -1)):
-            print("No error found.")
+            print("No error present.")
         else:
-            print(f"Error occured at col {err_loc[0]} row {err_loc[1]}")
-
-    # 10 incorrect cases
-    for i in range(10):
-        datawords = [generate_bit_string() for _ in range(num_words)]
-        print(f"Test #{10+i}")
-        print("Input Datawords: ")
-        for dataword in datawords:
-            print(f"\t{dataword}")
-
-        codewords = generator(datawords, word_size, num_words)
-        print("Codewords:")
-        for codeword in codewords:
-            print(f"\t\'{codeword}\'")
-
-        # random error point
-        error_row = np.random.randint(0, num_words)
-        error_col = np.random.randint(0, word_size)
-        codewords[error_row] = codewords[error_row][:error_col - 1] + ('0' if codewords[error_row][error_col] == '1' else '1') + codewords[error_row][error_col:]
-
-        syndrome, err_loc = checker(codewords)
-        print("Syndrome:")
-        for row in syndrome:
-            print(f"\t\'{row}\'")
-
-        if (err_loc == (-1, -1)):
-            print("No error found.")
-        else:
-            print(f"Error occured at col {err_loc[0]} row {err_loc[1]}")
-    # for i in range(10):
-    #     datawords = [generate_bit_string() for _ in range(num_words)]
-    #     codewords = generator(datawords, word_size, num_words)
-
-    #     # random error point
-    #     error_row = np.random.randint(0, num_words)
-    #     error_col = np.random.randint(0, word_size)
-    #     codewords[error_row][error_col] = '0' if codewords[error_row][error_col] == '1' else '1'
-
-    #     syndrome, err_loc = checker(codewords)
-    #     print(syndrome)
-    #     print("Error is found at", err_loc)
-
+            print(f"Error occured at col {err_loc[0]} row {err_loc[1]} (index starts at 0).")
+    
 test()
