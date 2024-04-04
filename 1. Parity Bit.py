@@ -5,8 +5,7 @@ import numpy as np
 def xor(str_list):
     return reduce(lambda x, y: int(x) ^ int(y), str_list)
 
-# If some dataword has size < word_size, the dataword must be appended (padded) with bit ‘0’ until the
-# size the dataword is word_size.
+
 def generator(datawords, word_size, num_words):
     # In case some dataword has size < word_size, append bit '0' until len(dataword) == word_size
     for i in range(len(datawords)):
@@ -30,6 +29,7 @@ def generator(datawords, word_size, num_words):
 
     return datawords
 
+
 def checker(codewords):
     err_loc = (-1, -1)
 
@@ -49,6 +49,7 @@ def checker(codewords):
             err_loc = (i, err_loc[1])
 
     return codewords, err_loc
+
 
 def test():    
     word_size = 8
@@ -78,6 +79,7 @@ def test():
             # random error point
             error_row = np.random.randint(0, num_words)
             error_col = np.random.randint(0, word_size)
+            # flip bit
             codewords[error_row] = codewords[error_row][:error_col] + ('0' if codewords[error_row][error_col] == '1' else '1') + codewords[error_row][error_col+1:]
 
         syndrome, err_loc = checker(codewords)
