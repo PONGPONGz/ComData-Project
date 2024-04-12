@@ -1,18 +1,26 @@
 def convert_to_binary(ascii_values):
+    # Convert ASCII values to 8-bit binary
     return ['{0:08b}'.format(value) for value in ascii_values]
 
 def binary_addition(binary_values):
+    # Initialize the sum with 8 bits
     total_sum = '00000000'
+    # Iterate over each binary value in the list
     for binary_value in binary_values:
         result = ''
         carry = 0
-        for i in range(7, -1, -1):
+        # Iterate over each bit position from right to left
+        for i in range(7, -1, -1): 
             bit_sum = int(total_sum[i]) + int(binary_value[i]) + carry
-            result = str(bit_sum % 2) + result  # Append the sum of bits to the result
-            carry = bit_sum // 2  # Calculate carry for the next bit
-        total_sum = result[-8:]  # Take only the last 8 bits
+            # Append the sum of bits to the result
+            result = str(bit_sum % 2) + result  
+             # Calculate carry for the next bit
+            carry = bit_sum // 2 
+        # Take only the last 8 bits of the result
+        total_sum = result[-8:]  
         if carry:
-            total_sum = bin(int(total_sum, 2) + 1)[2:].zfill(8)  # If there's a carry, add 1 to the next addition
+            # If there's a carry after processing all bits, add 1 to the next addition
+            total_sum = bin(int(total_sum, 2) + 1)[2:].zfill(8)
     return total_sum
 
 def binary_complement(binary_string):
@@ -29,10 +37,14 @@ def checksum_gen(file_name):
     # Convert data to ASCII values
     ascii_values = []
     for char in data:
-        if char != ' ':
-            value = ord(char)  # Get ASCII value of the character
-            ascii_values.append(value)
-            print(f"ASCII value for '{char}': {value}")
+        if char == ' ':
+            # Skip space character
+            print("Skipping space character.")
+            continue
+        # Get ASCII value of the character
+        value = ord(char)  
+        ascii_values.append(value)
+        print(f"ASCII value for '{char}': {value}")
 
     # Convert ASCII values to 8-bit binary
     binary_values = convert_to_binary(ascii_values)
@@ -42,7 +54,7 @@ def checksum_gen(file_name):
     total_binary_sum = binary_addition(binary_values)
     print("\nSum of binary values:", total_binary_sum)
 
-    # Calculate the checksum
+    # Calculate the checksum by taking the binary complement of the total sum
     checksum = binary_complement(total_binary_sum)
     print("Checksum:", checksum)
 
@@ -51,29 +63,27 @@ def checksum_gen(file_name):
 
 # Receiver Side
 def checksum_check(file_name, checksum_value):
-    # Open the file and read the data
     with open(file_name, 'r') as file:
         data = file.read()
     
     print("\nData from", file_name + ":", data + "\n")
 
-    # Convert data to ASCII values
     ascii_values = []
     for char in data:
-        if char != ' ':
-            value = ord(char)  # Get ASCII value of the character
-            ascii_values.append(value)
-            print(f"ASCII value for '{char}': {value}")
+        if char == ' ':
+            print("Skipping space character.")
+            continue
+        value = ord(char) 
+        ascii_values.append(value)
+        print(f"ASCII value for '{char}': {value}")
 
-    # Convert ASCII values to 8-bit binary
     binary_values = convert_to_binary(ascii_values)
     print("\nBinary values of data:\n", binary_values)
 
-    # Perform binary addition in chunks of 8 bits
     total_binary_sum = binary_addition(binary_values)
     print("\nSum of binary values:", total_binary_sum)
 
-    # Calculate the sum of binary values modulo 256 (including checksum)
+    # Add the checksum value to the total sum 
     total_binary_sum = binary_addition([total_binary_sum, checksum_value])
     print("\nTotal sum of data with checksum:", total_binary_sum)
 
